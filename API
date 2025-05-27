@@ -1,0 +1,58 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+import org.json.JSONObject;
+
+public class SimpleWeatherApp {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Ask for city input
+        System.out.print("Enter city name: ");
+        String city = scanner.nextLine();
+        scanner.close();
+
+        // Replace with your OpenWeatherMap API key
+        String apiKey = "your_api_key_here";
+
+        try {
+            // Create the API URL
+            String urlString = "https://api.openweathermap.org/data/2.5/weather?q="
+                    + city + "&appid=" + apiKey + "&units=metric";
+
+            // Connect to the API
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            // Read the response
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // Parse JSON
+            JSONObject json = new JSONObject(response.toString());
+
+            String cityName = json.getString("name");
+            double temp = json.getJSONObject("main").getDouble("temp");
+            String weather = json.getJSONArray("weather").getJSONObject(0).getString("description");
+
+            // Display result
+            System.out.println("\n--- Weather Info ---");
+            System.out.println("City: " + cityName);
+            System.out.println("Temperature: " + temp + " °C");
+            System.out.println("Condition: " + weather);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
